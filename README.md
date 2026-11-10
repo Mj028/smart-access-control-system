@@ -1,259 +1,190 @@
 # smart-access-control-system.
-Arduino Smart Access Control System
 
-An Arduino-based Smart Access Control System that implements two alternative authentication methods: RFID card authentication and keypad-based PIN authentication.
+An Arduino-based access control prototype that uses **two alternative authentication methods: a 4×4 keypad for PIN entry and an RFID reader for card authentication**. A 16×2 LCD provides system feedback, while a servo motor simulates the locking and unlocking mechanism.
 
-The system verifies user credentials and controls a servo motor to simulate an electronic door-lock mechanism. It also provides an LCD interface for menu navigation and real-time authentication feedback.
+## Project Overview
 
-Project Overview
+The Smart Access Control System demonstrates how embedded systems can be used to build a basic electronic access control solution.
 
-The Smart Access Control System was developed to explore the practical integration of microcontrollers, electronic peripherals, communication protocols, and embedded programming.
+Users can authenticate using either:
+- A predefined four-digit PIN.
+- An authorised RFID card.
 
-Users can authenticate themselves using either a predefined four-digit PIN or a registered RFID card. When authentication is successful, the system grants access and activates the servo motor. Otherwise, access is denied.
+When authentication is successful, the system grants access and activates the servo motor. If authentication fails, access is denied.
 
-Project Images
+## Project Images
 
-Physical Prototype
+### Physical Prototype
 
-"Smart Access Control System Prototype" (images/Prototype.jpg)
+![Smart Access Control System Prototype](./images/Prototype.jpg)
 
-Circuit Wiring Diagram
+### Wiring Diagram
 
-"Smart Access Control System Wiring Diagram" (images/wiring%20diagram.png)
+![Smart Access Control System Wiring Diagram](./images/wiring-diagram.png)
 
-Features
+## Features
 
-- Dual authentication using PIN or RFID.
-- Interactive menu displayed on a 16×2 I2C LCD.
-- 4×4 matrix keypad for PIN entry and menu navigation.
-- RFID card identification using the MFRC522 module.
-- Servo-controlled door-lock simulation.
+- Dual authentication options: PIN or RFID.
+- 4×4 matrix keypad for PIN entry.
+- RFID card authentication using the MFRC522 module.
+- 16×2 I2C LCD for menu navigation and status messages.
+- Servo motor for lock and unlock simulation.
 - Automatic relocking after five seconds.
-- Access-granted and access-denied feedback.
-- Finite State Machine (FSM) program architecture.
-- Non-blocking time management using "millis()".
+- State-based program structure for managing system operations.
 
-Hardware Components
+## Components Used
 
-Component| Function
-Arduino Uno R3 (ATmega328P)| Main microcontroller
-4×4 Matrix Keypad| PIN entry and navigation
-MFRC522 RFID Module| RFID card identification
-RFID Card| User authentication
-16×2 I2C LCD| User interface and status display
-SG90 Servo Motor| Simulates the door lock
-Breadboard| Circuit prototyping
-Jumper Wires| Electrical connections
+| Component | Purpose |
+|---|---|
+| Arduino Uno R3 | Main microcontroller |
+| 4×4 Matrix Keypad | PIN authentication |
+| MFRC522 RFID Module | RFID authentication |
+| RFID Card | User identification |
+| 16×2 I2C LCD | User interface and feedback |
+| SG90 Servo Motor | Locking mechanism simulation |
+| Breadboard and Jumper Wires | Circuit connections |
 
-How the System Works
+## System Operation
 
-1. System Initialization
+1. The system starts and displays the main menu.
+2. The user selects the Access System option.
+3. The user chooses either PIN authentication or RFID authentication.
+4. The system checks the entered PIN or scanned RFID card against the stored credentials.
+5. If authentication is successful:
+   - The LCD displays `ACCESS GRANTED`.
+   - The servo moves to the unlocked position.
+   - After five seconds, the servo returns to the locked position.
+6. If authentication fails:
+   - The LCD displays `ACCESS DENIED`.
+   - The system returns to the main menu after a short delay.
 
-When powered on, the Arduino initializes the LCD, keypad, RFID reader, and servo motor. The servo starts in the locked position.
+## Authentication Details
 
-2. Main Menu
+| Parameter | Current Configuration |
+|---|---|
+| Default PIN | `1234` |
+| PIN submission key | `#` |
+| PIN clear key | `*` |
+| PIN cancellation key | `D` |
+| Authorised RFID UID | `20 9E D1 3E` |
+| Locked servo position | 0° |
+| Unlocked servo position | 90° |
+| Automatic relocking time | 5 seconds |
 
-The LCD displays the main menu, allowing the user to access the authentication system or settings.
+## Hardware Connections
 
-The user navigates the menu using the keypad.
+### 1. I2C LCD
 
-3. Authentication Selection
+| LCD Pin | Arduino Uno |
+|---|---|
+| GND | GND |
+| VCC | 5V |
+| SDA | A4 |
+| SCL | A5 |
 
-The Access System menu provides two independent authentication options:
+I2C address: `0x27`
 
-- PIN Authentication
-- RFID Authentication
+### 2. 4×4 Matrix Keypad
 
-The user can select either method without needing to complete both.
+| Keypad Connection | Arduino Uno |
+|---|---|
+| Row 1 | D2 |
+| Row 2 | D3 |
+| Row 3 | D4 |
+| Row 4 | D5 |
+| Column 1 | D6 |
+| Column 2 | D7 |
+| Column 3 | D8 |
+| Column 4 | D9 |
 
-4. PIN Authentication
+### 3. MFRC522 RFID Module
 
-The user enters a predefined four-digit PIN through the keypad.
+| RFID Pin | Arduino Uno |
+|---|---|
+| SDA / SS | D10 |
+| SCK | D13 |
+| MOSI | D11 |
+| MISO | D12 |
+| RST | A0 |
+| GND | GND |
+| 3.3V | 3.3V |
 
-The configured PIN is:
+**Important:** The MFRC522 operates at 3.3V. Do not connect its power pin to the Arduino's 5V supply. Ensure its 5V input signals are appropriately level-shifted.
 
-"1234"
+### 4. SG90 Servo Motor
 
-Keypad functions:
+| Servo Wire | Connection |
+|---|---|
+| Brown | GND |
+| Red | 5V supply |
+| Orange/Yellow | A1 |
 
-Key| Function
-"#"| Submit PIN
-"*"| Clear entered digits
-"D"| Cancel operation
+If using an external 5V supply for the servo, connect its ground to the Arduino GND to establish a common reference.
 
-The system compares the entered PIN with the stored PIN.
-
-5. RFID Authentication
-
-The user presents an RFID card to the MFRC522 reader.
-
-The reader obtains the card's Unique Identifier (UID), which the Arduino compares with the registered UID.
-
-Registered RFID UID:
-
-"20 9E D1 3E"
-
-6. Successful Authentication
-
-When the entered PIN or presented RFID card is valid, the LCD displays:
-
-ACCESS GRANTED
-Door Unlocked
-
-The servo moves to 90°, simulating an unlocked door.
-
-After five seconds, the servo returns to 0°, simulating automatic relocking.
-
-7. Failed Authentication
-
-When an incorrect PIN or unauthorized RFID card is presented, the LCD displays:
-
-ACCESS DENIED
-Try Again
-
-The servo remains in the locked position. After approximately 1.5 seconds, the system returns to the main menu.
-
-Circuit Connections
-
-The following tables describe the connections used in the prototype.
-
-1. I2C LCD
-
-LCD Pin| Arduino Uno
-GND| GND
-VCC| 5V
-SDA| A4
-SCL| A5
-
-I2C address: "0x27"
-
-2. 4×4 Matrix Keypad
-
-Keypad Connection| Arduino Uno
-Row 1| D2
-Row 2| D3
-Row 3| D4
-Row 4| D5
-Column 1| D6
-Column 2| D7
-Column 3| D8
-Column 4| D9
-
-3. MFRC522 RFID Module
-
-RFID Pin| Arduino Uno
-SDA / SS| D10
-SCK| D13
-MOSI| D11
-MISO| D12
-RST| A0
-GND| GND
-3.3V| 3.3V
-IRQ| Not connected
-
-Electrical note: The MFRC522 is a 3.3V device. Do not power it from the Arduino's 5V pin. Use appropriate logic-level shifting for the Arduino's 5V output signals connected to the RFID module.
-
-4. SG90 Servo Motor
-
-Servo Wire| Arduino Uno
-Brown| GND
-Red| 5V supply
-Orange / Yellow| A1
-
-An external regulated 5V supply may be needed for reliable servo operation. When using one, connect its ground to the Arduino ground.
-
-Software and Libraries
+## Software and Libraries
 
 The project was developed using the Arduino IDE.
 
 Libraries used:
+- Wire
+- SPI
+- MFRC522
+- Keypad
+- Servo
+- hd44780
+- string.h
 
-- "Wire.h" – I2C communication.
-- "SPI.h" – SPI communication.
-- "MFRC522.h" – RFID communication and card identification.
-- "Keypad.h" – Matrix keypad interfacing.
-- "Servo.h" – Servo motor control.
-- "hd44780.h" – LCD library.
-- "hd44780_I2Cexp.h" – I2C LCD interface.
-- "string.h" – String handling.
+## Program Structure
 
-Program Architecture
+The firmware uses a state-based approach to manage the different operating modes.
 
-The firmware uses a Finite State Machine (FSM) approach to organize the different operating modes of the system.
+The main states include:
 
-The main states are:
+- `MAIN_MENU`
+- `ACCESS_MENU`
+- `PIN_MODE`
+- `RFID_MODE`
+- `SETTINGS_MODE`
+- `ACCESS_GRANTED`
+- `ACCESS_DENIED`
 
-State| Description
-"MAIN_MENU"| Displays the main menu
-"ACCESS_MENU"| Allows authentication method selection
-"PIN_MODE"| Handles PIN authentication
-"RFID_MODE"| Handles RFID authentication
-"SETTINGS_MODE"| Displays the settings interface
-"ACCESS_GRANTED"| Handles successful authentication
-"ACCESS_DENIED"| Handles failed authentication
+The `millis()` function handles the automatic relocking and timed transitions without relying on long blocking delays.
 
-A "switch" statement manages the transitions between these states.
-
-The Arduino "millis()" function is used to manage timed operations, including automatic relocking, without relying on long blocking delays.
-
-Concepts Demonstrated
-
-This project provided practical experience with:
-
-- Microcontroller programming.
-- Digital input and output interfacing.
-- I2C and SPI communication protocols.
-- Matrix keypad interfacing.
-- RFID identification and authentication.
-- LCD interfacing.
-- Servo motor control.
-- Finite State Machine implementation.
-- Non-blocking timing using "millis()".
-- Integration of multiple electronic peripherals.
-
-Current Limitations
+## Current Limitations
 
 This project is an educational prototype, not a production-ready security system.
 
-Its current limitations include:
-
+Current limitations include:
 - The PIN is hardcoded in the firmware.
-- Only one RFID card UID is registered.
-- The Settings menu is currently a placeholder.
-- The servo motor simulates a door-lock mechanism rather than operating a full physical door lock.
-- Additional security mechanisms would be required for real-world deployment.
+- Only one RFID card is authorised.
+- The settings menu is currently a placeholder.
+- The servo motor demonstrates the locking mechanism rather than controlling a full physical door lock.
 
-Possible Future Improvements
+## Possible Improvements
 
 - Allow users to change their PIN.
-- Support multiple registered RFID cards.
-- Implement administrator authentication.
+- Support multiple authorised RFID cards.
 - Store credentials in non-volatile memory.
-- Add an alarm or notification system for repeated failed attempts.
+- Implement an administrator mode.
+- Add an alarm or notification system.
 - Design a dedicated PCB and enclosure.
-- Improve credential management and overall system security.
+- Improve the overall security of the authentication process.
 
-Repository Structure
+## What I Learned
 
-smart-access-control-system/
-│
-├── Smart_Access_Control.ino
-│
-├── README.md
-│
-└── images/
-    ├── .gitkeep
-    ├── Prototype.jpg
-    └── wiring diagram.png
+Through this project, I gained practical experience with:
 
-Author
+- Interfacing multiple peripherals with an Arduino Uno.
+- Keypad scanning and PIN validation.
+- RFID communication using SPI.
+- I2C communication with an LCD.
+- Servo motor control.
+- State machines and program flow management.
+- Using `millis()` for non-blocking timing operations.
+- Integrating hardware and software into a functional embedded system.
 
-Joseph Matthew Oluwatayo
+## Author
 
-Electrical and Electronics Engineering Undergraduate
-
-Areas of Focus: Embedded Systems, Robotics and Control Systems.
-
----
-
-This project represents part of my practical exploration of embedded systems, hardware interfacing, and intelligent electronic control systems.
+**Joseph Matthew Oluwatayo**  
+Electrical and Electronics Engineering Undergraduate  
+Interest Areas: Embedded Systems, Robotics and Control Systems
