@@ -18,7 +18,7 @@ Project Images
 
 Physical Prototype
 
-"Smart Access Control System Prototype" (images/prototype.jpg)
+"Smart Access Control System Prototype" (images/Prototype.jpg)
 
 Circuit Wiring Diagram
 
